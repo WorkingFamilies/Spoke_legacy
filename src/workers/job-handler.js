@@ -13,10 +13,6 @@ function jobMap() {
 }
 
 
-// commenting this out, as jobs will be run
-// directly triggered from the request that initiated them
-// instead of a separate process
-
 (async () => {
   while (true) {
     try {
@@ -31,16 +27,15 @@ function jobMap() {
         break
       }
 
-      await r.table('job_request')
-        .filter({
-          assigned: true
-        })
-        .filter((row) => row('updated_at')
-          .lt(r.now().sub(60 * 2)))
+      var twoMinutesAgo = new Date(new Date() - 1000 * 60 * 2)
+      // delete jobs that are older than 2 minutes
+      // to clear out stuck jobs
+      await r.knex('job_request')
+        .where({ assigned: true })
+        .where('updated_at', '<', twoMinutesAgo)
         .delete()
     } catch (ex) {
       log.error(ex)
     }
   }
 })()
-
