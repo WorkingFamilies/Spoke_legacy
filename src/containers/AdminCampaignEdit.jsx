@@ -39,6 +39,7 @@ const campaignInfoFragment = `
       text
       answerOptions {
         value
+        action
         nextInteractionStep {
           id
         }
@@ -175,6 +176,7 @@ class AdminCampaignEdit extends React.Component {
           script: step.script,
           answerOptions: step.question ? step.question.answerOptions.map((answer) => ({
             value: answer.value,
+            action: answer.action,
             nextInteractionStepId: answer.nextInteractionStep ? answer.nextInteractionStep.id : null
           })) : []
         }))
@@ -264,7 +266,8 @@ class AdminCampaignEdit extends React.Component {
       checkCompleted: () => this.state.campaignFormValues.interactionSteps.length > 0 && this.state.campaignFormValues.interactionSteps[0].script !== '',
       blocksStarting: true,
       extraProps: {
-        customFields: this.props.campaignData.campaign.customFields
+        customFields: this.props.campaignData.campaign.customFields,
+        availableActions: this.props.availableActionsData.availableActions
       }
     }, {
       title: 'Canned Responses',
@@ -307,7 +310,6 @@ class AdminCampaignEdit extends React.Component {
     let shouldDisable = forceDisable || (!this.isNew() && this.checkSectionSaved(section))
     const ContentComponent = section.content
     const formValues = this.getSectionState(section)
-
     return (
       <ContentComponent
         onChange={this.handleChange}
@@ -514,7 +516,8 @@ AdminCampaignEdit.propTypes = {
   organizationData: React.PropTypes.object,
   params: React.PropTypes.object,
   location: React.PropTypes.object,
-  pendingJobsData: React.PropTypes.object
+  pendingJobsData: React.PropTypes.object,
+  availableActionsData: React.PropTypes.object
 }
 
 const mapQueriesToProps = ({ ownProps }) => ({
@@ -562,7 +565,17 @@ const mapQueriesToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       role: 'TEXTER'
-    }
+    },
+    pollInterval: 250000
+  },
+  availableActionsData: {
+    query: gql`query getAction {
+      availableActions {
+        name
+        display_name
+      }
+    }`,
+    forceFetch: true
   }
 })
 
