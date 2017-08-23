@@ -187,6 +187,21 @@ class AdminCampaignEdit extends React.Component {
       this.setState({
         campaignFormValues: this.props.campaignData.campaign
       })
+      // check for jobs; poll until jobs are complete
+      const self = this
+      const pollUntilDone = async () => {
+        debugger
+        self.props.organizationData.refetch()
+        self.props.campaignData.refetch()
+        await self.props.pendingJobsData.refetch()
+        debugger
+        console.log("self.props.pendingJobsData " + JSON.stringify(self.props.pendingJobsData))
+        if (self.props.pendingJobsData.campaign.pendingJobs.length > 0) {
+          console.log("newcampaign.interactionSteps " + newCampaign.interactionSteps)
+          setTimeout(pollUntilDone, 3000)
+        }
+      }
+      pollUntilDone()
     }
   }
 
@@ -517,8 +532,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     }`,
     variables: {
       campaignId: ownProps.params.campaignId
-    },
-    pollInterval: 100000
+    }
   },
   campaignData: {
     query: gql`query getCampaign($campaignId: String!) {
@@ -528,8 +542,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     }`,
     variables: {
       campaignId: ownProps.params.campaignId
-    },
-    pollInterval: 200000
+    }
   },
   organizationData: {
     query: gql`query getOrganizationData($organizationId: String!, $role: String!) {
@@ -549,8 +562,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
     variables: {
       organizationId: ownProps.params.organizationId,
       role: 'TEXTER'
-    },
-    pollInterval: 250000
+    }
   }
 })
 
