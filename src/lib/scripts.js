@@ -27,6 +27,7 @@ const getScriptFieldValue = (contact, texter, fieldName) => {
     const customFieldNames = JSON.parse(contact.customFields)
     result = customFieldNames[fieldName]
   }
+  
   return result
 }
 
