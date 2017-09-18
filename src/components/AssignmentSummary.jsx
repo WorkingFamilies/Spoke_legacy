@@ -38,11 +38,15 @@ class AssignmentSummary extends Component {
       router.push(`/app/${organizationId}/todos/${assignmentId}/${contactsFilter}`)
     }
   }
-  renderBadgedButton({ assignment, title, count, primary, disabled, contactsFilter }) {
+  renderBadgedButton({ assignment, title, count, primary, disabled, contactsFilter, color }) {
+    const badgeStyle = Object.assign({}, inlineStyles.badge)
+    if (typeof color !== 'undefined') {
+      badgeStyle.backgroundColor = color
+    }
     return (count === 0 ? '' :
       <Badge
         key={title}
-        badgeStyle={inlineStyles.badge}
+        badgeStyle={badgeStyle}
         badgeContent={count}
         primary={primary && !disabled}
         secondary={!primary && !disabled}
@@ -85,6 +89,15 @@ class AssignmentSummary extends Component {
               primary: false,
               disabled: false,
               contactsFilter: 'reply'
+            })}
+            {this.renderBadgedButton({
+              assignment,
+              title: 'Review texts',
+              count: 4,
+              primary: false,
+              disabled: false,
+              color: '#999999',
+              contactsFilter: 'review'
             })}
             {this.renderBadgedButton({
               assignment,
