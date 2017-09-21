@@ -98,6 +98,7 @@ export async function handleIncomingMessages() {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
+      console.log('sleep1 way before')
       const countPendingMessagePart = await r.knex('pending_message_part')
       .count('id AS total').then( total => {
         let totalCount = 0
@@ -105,11 +106,15 @@ export async function handleIncomingMessages() {
         return totalCount
       })
 
+      console.log('sleep1 before')
       await sleep(500)
+      console.log('sleep1 after')
       if(countPendingMessagePart > 0) {
         await handleIncomingMessageParts()
       }
+      console.log('sleep1 handleIncomingMessageParts after')
     } catch (ex) {
+      console.log('sleep1 error', ex)
       log.error(ex)
     }
   }
