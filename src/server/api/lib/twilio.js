@@ -19,10 +19,15 @@ if (!process.env.TWILIO_MESSAGE_SERVICE_SID) {
   log.warn('Twilio will not be able to send without TWILIO_MESSAGE_SERVICE_SID set')
 }
 
+let webhookCache = null
+
 function webhook() {
   log.warn('twilio webhook call') // sky: doesn't run this
   if (twilio) {
-    return Twilio.webhook()
+    if (!webhookCache) {
+      webhookCache = twilio.webhook()
+    }
+    return webhookCache
   } else {
     log.warn('NO TWILIO WEB VALIDATION')
     return function (req, res, next) { next() }
