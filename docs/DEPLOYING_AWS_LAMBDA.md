@@ -59,6 +59,10 @@ NOTES:
 claudia add-scheduled-event --name spoke-job-runner --schedule 'rate(5 minutes)' --event ./deploy/lambda-scheduled-event.json
 ```
 
+```
+claudia add-scheduled-event --name spoke-ping --schedule 'rate(5 minutes)' --event ./deploy/lambda-scheduled-ping.json
+```
+
 ## Migrating the database:
 
 New migrations are added to `src/migrations/index.js`.  You can trigger migration updates with the following

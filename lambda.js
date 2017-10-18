@@ -4,7 +4,7 @@ const awsServerlessExpress = require('aws-serverless-express')
 
 // NOTE we lazy-load the modules, so that we can possibly add environment variables that affect the load earlier
 
-exports.handler = (event, context) => {
+exports.handler = (event, context, callback) => {
   if (process.env.LAMBDA_DEBUG_LOG) {
     console.log('LAMBDA EVENT', event)
   }
@@ -22,8 +22,10 @@ exports.handler = (event, context) => {
         console.log('SLOW_RESPONSE milliseconds:', startTime-endTime, event)
       }
     }
-
     return webResponse
+  } else if (event.command === 'ping') {
+    // no-op ping to keep server active, where useful, e.g. Amazon Lambda.
+    callback()
   } else {
     // handle a custom command sent as an event
     const functionName = context.functionName

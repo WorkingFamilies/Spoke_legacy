@@ -1,0 +1,4 @@
+{
+  "command": "ping",
+  "description": "see docs/DEPLOYING_AWS_LAMBDA.md"
+}
