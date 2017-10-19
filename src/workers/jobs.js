@@ -552,14 +552,28 @@ export async function exportCampaign(job) {
       const questionResponses = await r.table('question_response')
         .getAll(contact.id, { index: 'campaign_contact_id' })
       Object.keys(allQuestions).forEach((stepId) => {
+        console.log('step id:', stepId);
         let value = ''
         questionResponses.forEach((response) => {
-          if (response.interaction_step_id === stepId) {
+          console.log('response:',response)
+
+          if (response.interaction_step_id == stepId) {
+            console.log('response:', response);
             value = response.value
+            console.log('response inside if:', value);
+            console.log(' inside if statement --- interaction step value:', value )
           }
         })
-        contactRow[`question[${allQuestions[stepId]}]`] = value
+        console.log('All questions:', allQuestions);
+        console.log(' stepId', stepId);
+        console.log(' contact row:', contactRow);
+        console.log('contact row at all questions:', contactRow[`question[${allQuestions[stepId]}]`]);
+        console.log('response value:', response.value);
+        value = contactRow[`question[${allQuestions[stepId]}]`]
+        console.log('outside if statement --- interaction step value:', value)
       })
+
+      console.log('contact row:', contactRow)
 
       return contactRow
     })
