@@ -672,6 +672,5 @@ const mapMutationsToProps = () => ({
 })
 
 export default loadData(wrapMutations(AdminCampaignEdit), {
-  mapQueriesToProps,
   mapMutationsToProps
 })

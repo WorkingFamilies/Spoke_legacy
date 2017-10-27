@@ -130,14 +130,17 @@ class AssignmentTexter extends React.Component {
     ]
   }
 
-  renderTexter() {
+  async renderTexter() {
     const { assignment } = this.props
     const { campaign, texter } = assignment
     const contact = this.currentContact()
     const navigationToolbarChildren = this.renderNavigationToolbarChildren()
+    console.log('contactData', this.props.getContactData)
+    const contactData = this.props.getContactData(this, contact.id)
     return (
       <AssignmentTexterContact
         key={contact.id}
+        contact={contactData}
         assignment={assignment}
         campaignContactId={contact.id}
         texter={texter}
@@ -182,7 +185,8 @@ AssignmentTexter.propTypes = {
   contacts: React.PropTypes.array,   // contacts for current assignment
   router: React.PropTypes.object,
   organizationId: React.PropTypes.string,
-  onRefreshAssignmentContacts: React.PropTypes.func
+  onRefreshAssignmentContacts: React.PropTypes.func,
+  getContactData: React.PropTypes.func
 }
 
 export default withRouter(AssignmentTexter)
