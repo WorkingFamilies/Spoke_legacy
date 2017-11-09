@@ -1,0 +1,10 @@
+{
+  "base_url": "https://example.org/",
+  "base_auth0_url": "https://example.auth0.com/",
+  "users": {
+    "admin": {
+      "email": "someone@example.org",
+      "pass": ""
+    }
+  }
+}
