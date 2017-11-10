@@ -755,7 +755,7 @@ class AssignmentTexterContact extends React.Component {
             label='Your message'
             multiLine
             fullWidth
-            rowsMax={10}
+            rowsMax={6}
           />
           {this.renderCorrectSendButton()}
         </GSForm>
