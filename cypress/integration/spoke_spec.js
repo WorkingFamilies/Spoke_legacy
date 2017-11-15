@@ -1,12 +1,14 @@
-describe('Home page', function(){
-  it('.should() - assert that <title> is correct', function(){
+describe('Anonymous', function(){
+  it('home page <title> is correct', function(){
     cy.fixture('spoke.json').then((fixture) => {
       cy.visit(fixture.base_url)
       cy.title().should('eq', 'Spoke')
     })
   })
+})
 
-  context('Admin', function(){
+describe('Admin', function(){
+  context('Campaign creation', function(){
     beforeEach(function(){
       cy.fixture('spoke.json').then((fixture) => {
         cy.visit(`${fixture.base_auth0_url}logout`)
@@ -29,6 +31,12 @@ describe('Home page', function(){
       var today = new Date();
       cy.get('input[name=title]')
         .type(`Automated Test Campaign ${today.toISOString()}`)
+      cy.get('input[name=description]')
+        .type(`Automated Test Description`)
+      cy.get('input[name=dueBy]')
+        .click()
+      // TODO: make calendar elements reliably selectable so we can automate
+      // clicks. See: https://github.com/MoveOnOrg/Spoke/issues/396
     })
   })
 })
