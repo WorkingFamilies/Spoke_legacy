@@ -13,7 +13,10 @@ const inlineStyles = {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: '56px',
+    position: 'absolute',
+    top: '56px',
+    left: 0,
+    right: 0,
     width: 200,
     marginLeft: 'auto',
     marginRight: 'auto',
