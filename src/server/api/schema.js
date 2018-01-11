@@ -964,6 +964,10 @@ const rootResolvers = {
     organization: async(_, { id }, { loaders }) =>
       loaders.organization.load(id),
     inviteByHash: async (_, { hash }, { loaders, user }) => {
+      console.log('INVITEBYHASH', hash, user)
+      // if (!process.env.SUPPRESS_SELF_INVITE) {}
+      // ^^^ not here, but i think we need to make sure they login before they
+      // click the link first
       authRequired(user)
       return r.table('invite').filter({ hash })
     },
