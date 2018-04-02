@@ -521,28 +521,39 @@ export async function exportCampaign(job) {
   const messageCsv = Papa.unparse(finalCampaignMessages)
 
   if (process.env.AWS_ACCESS_AVAILABLE || (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)) {
-    const s3bucket = new AWS.S3({ params: { Bucket: process.env.AWS_S3_BUCKET_NAME } })
-    const campaignTitle = campaign.title.replace(/ /g, '_').replace(/\//g, '_')
-    const key = `${campaignTitle}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.csv`
-    const messageKey = `${key}-messages.csv`
-    let params = { Key: key, Body: campaignCsv }
-    await s3bucket.putObject(params).promise()
-    params = { Key: key, Expires: 86400 }
-    const campaignExportUrl = await s3bucket.getSignedUrl('getObject', params)
-    params = { Key: messageKey, Body: messageCsv }
-    await s3bucket.putObject(params).promise()
-    params = { Key: messageKey, Expires: 86400 }
-    const campaignMessagesExportUrl = await s3bucket.getSignedUrl('getObject', params)
-    await sendEmail({
-      to: user.email,
-      subject: `Export ready for ${campaign.title}`,
-      text: `Your Spoke exports are ready! These URLs will be valid for 24 hours.
+    try {
+      const s3bucket = new AWS.S3({ params: { Bucket: process.env.AWS_S3_BUCKET_NAME } })
+      const campaignTitle = campaign.title.replace(/ /g, '_').replace(/\//g, '_')
+      const key = `${campaignTitle}-${moment().format('YYYY-MM-DD-HH-mm-ss')}.csv`
+      const messageKey = `${key}-messages.csv`
+      let params = { Key: key, Body: campaignCsv }
+      await s3bucket.putObject(params).promise()
+      params = { Key: key, Expires: 86400 }
+      const campaignExportUrl = await s3bucket.getSignedUrl('getObject', params)
+      params = { Key: messageKey, Body: messageCsv }
+      await s3bucket.putObject(params).promise()
+      params = { Key: messageKey, Expires: 86400 }
+      const campaignMessagesExportUrl = await s3bucket.getSignedUrl('getObject', params)
+      await sendEmail({
+        to: user.email,
+        subject: `Export ready for ${campaign.title}`,
+        text: `Your Spoke exports are ready! These URLs will be valid for 24 hours.
 
-      Campaign export: ${campaignExportUrl}
+        Campaign export: ${campaignExportUrl}
 
-      Message export: ${campaignMessagesExportUrl}`
-    })
-    log.info(`Successfully exported ${id}`)
+        Message export: ${campaignMessagesExportUrl}`
+      })
+      log.info(`Successfully exported ${id}`)
+    } catch (err) {
+      log.error(err)
+      await sendEmail({
+        to: user.email,
+        subject: `Export failed for ${campaign.title}`,
+        text: `Your Spoke exports failed... please try again later.
+
+        Error: ${err.message}`
+      })
+    }
   } else {
     log.debug('Would have saved the following to S3:')
     log.debug(campaignCsv)
@@ -550,7 +561,18 @@ export async function exportCampaign(job) {
   }
 
   if (job.id) {
-    await r.table('job_request').get(job.id).delete()
+    let retries = 0
+    const deleteJob = async () => {
+      try {
+        r.table('job_request').get(job.id).delete()
+      } catch (err) {
+        if (retries < 5) await deleteJob()
+        else log.error(`Could not delete job. Err: ${err.message}`)
+        retries += 1
+      }
+    }
+
+    await deleteJob()
   }
 }
 
