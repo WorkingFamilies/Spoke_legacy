@@ -573,7 +573,7 @@ export async function exportCampaign(job) {
     }
 
     await deleteJob()
-  }
+  } else log.debug(job)
 }
 
 // add an in-memory guard that the same messages are being sent again and again
