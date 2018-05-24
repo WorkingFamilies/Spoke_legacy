@@ -10,6 +10,8 @@ import { ApolloProvider } from 'react-apollo'
 import ApolloClientSingleton from '../network/apollo-client-singleton'
 import { login, logout } from './auth-service'
 
+import 'react-virtualized/styles.css'
+
 window.onerror = (msg, file, line, col, error) => { errorCatcher(error) }
 window.addEventListener('unhandledrejection', (event) => { errorCatcher(event.reason) })
 window.AuthService = {
