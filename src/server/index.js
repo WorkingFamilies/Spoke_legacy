@@ -127,19 +127,30 @@ app.post('/twilio-message-report', wrap(async (req, res) => {
 
 app.get('/allmessages/:organizationId', wrap(async (req, res) => {
   const orgId = req.params.organizationId
+  const { limit, offset, minTimestamp } = req.query
   await accessRequired(req.user, orgId, 'SUPERVOLUNTEER', /* superadmin*/true)
+
   const messages = await r.knex('message')
     .select(
       'message.id',
       'message.text',
-      'message.user_number',
+      'user.first_name AS user_first_name',
+      'user.last_name AS user_last_name',
+      'user.cell AS user_number',
+      'campaign_contact.first_name AS contact_first_name',
+      'campaign_contact.last_name AS contact_last_name',
       'message.contact_number',
-      'message.created_at'
+      'message.created_at',
+      'message.is_from_contact'
     )
     .join('assignment', 'message.assignment_id', 'assignment.id')
+    .join('user', 'user.id', 'assignment.user_id')
     .join('campaign', 'assignment.campaign_id', 'campaign.id')
+    .join('campaign_contact', 'campaign_contact.cell', 'message.contact_number')
     .where('campaign.organization_id', orgId)
-    .where('message.is_from_contact', true)
+    .andWhere('message.created_at', '>', minTimestamp || '1970-01-01')
+    .limit(limit || 500)
+    .offset(offset || 0)
     .orderBy('message.created_at', 'desc')
   return res.json(messages)
 }))
