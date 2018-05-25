@@ -32,6 +32,8 @@ export {
   getChildren,
   makeTree
 } from './interaction-step-helpers'
+export sqlString from './sql-string'
+
 const requiredUploadFields = ['firstName', 'lastName', 'cell']
 const topLevelUploadFields = ['firstName', 'lastName', 'cell', 'zip', 'external_id']
 
