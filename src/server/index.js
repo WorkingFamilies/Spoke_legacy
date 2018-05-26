@@ -148,7 +148,7 @@ app.get('/allmessages/:organizationId', wrap(async (req, res) => {
     .join('campaign', 'assignment.campaign_id', 'campaign.id')
     .join('campaign_contact', 'campaign_contact.cell', 'message.contact_number')
     .where('campaign.organization_id', orgId)
-    .andWhere('message.created_at', '>', minTimestamp || '1970-01-01')
+    .andWhere('message.created_at', '>=', minTimestamp || '1970-01-01')
     .limit(limit || 500)
     .offset(offset || 0)
     .orderBy('message.created_at', 'desc')

@@ -1,3 +1,4 @@
+if (process.env.CRON_JOB) require('dotenv').load()
 import dumbThinky from 'rethink-knex-adapter'
 import redis from 'redis'
 import bluebird from 'bluebird'
