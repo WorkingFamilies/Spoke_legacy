@@ -152,7 +152,7 @@ import { groupBy } from 'lodash'
       }
 
       return sendEmail({
-        to: userGroup.map(u => `${u.user_first_name} ${u.user_email}`).join(', '),
+        to: userGroup.map(u => u.user_email).join(', '),
         subject: `Results for ${orgName} – ${yesterday}`,
         html
       })
