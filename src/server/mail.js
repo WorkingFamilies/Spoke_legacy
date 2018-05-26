@@ -1,4 +1,3 @@
-if (process.env.CRON_JOB) require('dotenv').load()
 import { log } from '../lib'
 import nodemailer from 'nodemailer'
 import mailgunConstructor from 'mailgun-js'
