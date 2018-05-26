@@ -6,7 +6,7 @@ import { groupBy } from 'lodash'
 
 (async () => {
   try {
-    const today = moment().format('dddd, MMM Do')
+    const yesterday = moment().subtract(1, 'day').format('dddd, MMM Do')
     const allowedRoles = [
       'OWNER',
       'ADMIN',
@@ -32,11 +32,11 @@ import { groupBy } from 'lodash'
       const campaignResults = await r.knex.select(r.knex.raw(SQL`
         c.title AS campaign,
         c.description,
-        texters,
-        texts_sent,
-        replies,
-        total_texts,
-        opt_outs,
+        texters::int,
+        texts_sent::int,
+        replies::int,
+        total_texts::int,
+        opt_outs::int,
         ROUND((((texters * 1) / 30)  + (total_texts * .0075)), 2) AS cost,
         (SELECT array_to_json(array_agg(row_to_json(t))) FROM (
           SELECT campaign_id,
@@ -46,7 +46,7 @@ import { groupBy } from 'lodash'
           FROM interaction_step AS i
           INNER JOIN question_response AS r ON r.interaction_step_id = i.id
           WHERE i.campaign_id = c.id
-          AND r.created_at >= '2018-05-22'
+          AND r.created_at >= CURRENT_DATE - INTERVAL '1 day'
           GROUP BY 1,2,3
         ) AS t) AS responses
         FROM campaign AS c
@@ -59,9 +59,9 @@ import { groupBy } from 'lodash'
             COUNT(DISTINCT o.id) AS opt_outs
           FROM assignment AS a
           INNER JOIN message AS m ON m.assignment_id = a.id
-            AND m.created_at >= '2018-05-22'
+            AND m.created_at >= CURRENT_DATE - INTERVAL '1 day'
           LEFT JOIN opt_out AS o ON o.assignment_id = a.id
-            AND o.created_at >= '2018-05-22'
+            AND o.created_at >= CURRENT_DATE - INTERVAL '1 day'
           GROUP BY 1
         ) AS m ON m.campaign_id = c.id
         WHERE c.organization_id = ${orgId}
@@ -71,7 +71,7 @@ import { groupBy } from 'lodash'
       const orgName = userGroup[0].organization_name
 
       let html = `<p>Hi ${userGroup[0].user_first_name},`
-        + 'there are no Spoke results to report for today...</p>'
+        + 'there are no Spoke results to report for yesterday...</p>'
 
       if (campaignResults.length) {
         const campaignTables = campaignResults.map(({
@@ -83,7 +83,7 @@ import { groupBy } from 'lodash'
             responseHTML = Object.keys(questionGroup).map((question) => (`
               <div style="overflow-x:auto;width:100%">
                 <div><b>Question:</b> ${question}</div>
-                <table>
+                <table style="font-size:11px">
                   <tr>
                     ${questionGroup[question].map(({ answer }) => (`
                       <th style="width: 100px">${answer}</th>
@@ -102,7 +102,7 @@ import { groupBy } from 'lodash'
           }
 
           return (`
-            <div>
+            <div style="border: 2px solid #888;padding: 10px;border-radius: 3px">
               <div><b>${campaign}</b></div>
               <div><em>${description}</em></div>
               <br>
@@ -116,12 +116,24 @@ import { groupBy } from 'lodash'
                   <th>Cost</th>
                 </tr>
                 <tr>
-                  <td style="text-align:center">${results.texters}</td>
-                  <td style="text-align:center">${results.texts_sent}</td>
-                  <td style="text-align:center">${results.replies}</td>
-                  <td style="text-align:center">${results.total_texts}</td>
-                  <td style="text-align:center">${results.opt_outs}</td>
-                  <td style="text-align:center">$${results.cost}</td>
+                  <td style="text-align:center">
+                    ${results.texters.toLocaleString()}
+                  </td>
+                  <td style="text-align:center">
+                    ${results.texts_sent.toLocaleString()}
+                  </td>
+                  <td style="text-align:center">
+                    ${results.replies.toLocaleString()}
+                  </td>
+                  <td style="text-align:center">
+                    ${results.total_texts.toLocaleString()}
+                  </td>
+                  <td style="text-align:center">
+                    ${results.opt_outs.toLocaleString()}
+                  </td>
+                  <td style="text-align:center">
+                    $${results.cost}
+                  </td>
                 </tr>
               </table>
               <br>
@@ -132,20 +144,19 @@ import { groupBy } from 'lodash'
 
         html = `
           <p>
-            Hi ${userGroup[0].user_first_name},
-            here are the Spoke texting results from today by campaign:
+            Hi all, here are the Spoke texting results from ${yesterday} by campaign:
           </p>
+          <br>
           <p>${campaignTables.join('<br><br><br>')}</p>
         `
       }
 
       return sendEmail({
-        to: 'cjgordon@gmail.com',
-        subject: `Texting results for ${orgName} – ${today}`,
+        to: userGroup.map(u => `${u.user_first_name} ${u.user_email}`).join(', '),
+        subject: `Results for ${orgName} – ${yesterday}`,
         html
       })
     }))
-
 
     process.exit()
   } catch (err) {
