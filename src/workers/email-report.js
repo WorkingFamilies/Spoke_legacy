@@ -65,13 +65,13 @@ import { groupBy } from 'lodash'
           GROUP BY 1
         ) AS m ON m.campaign_id = c.id
         WHERE c.organization_id = ${orgId}
+        AND texts_sent::int > 0
       `))
 
       const userGroup = orgUserGroups[orgId]
       const orgName = userGroup[0].organization_name
 
-      let html = `<p>Hi ${userGroup[0].user_first_name},`
-        + 'there are no Spoke results to report for yesterday...</p>'
+      let html = `<p>There were no Spoke results to report for ${orgName} from ${yesterday}.</p>`
 
       if (campaignResults.length) {
         const campaignTables = campaignResults.map(({
@@ -102,7 +102,7 @@ import { groupBy } from 'lodash'
           }
 
           return (`
-            <div style="border: 2px solid #888;padding: 10px;border-radius: 3px">
+            <div style="border: 2px solid #888;margin-right:15px;padding: 10px;border-radius: 3px">
               <div><b>${campaign}</b></div>
               <div><em>${description}</em></div>
               <br>
@@ -144,7 +144,7 @@ import { groupBy } from 'lodash'
 
         html = `
           <p>
-            Hi all, here are the Spoke texting results from ${yesterday} by campaign:
+            Hi all, here are the Spoke texting results by campaign for ${orgName} from ${yesterday}:
           </p>
           <br>
           <p>${campaignTables.join('<br><br><br>')}</p>
