@@ -37,7 +37,7 @@ import { groupBy } from 'lodash'
         replies::int,
         total_texts::int,
         opt_outs::int,
-        ROUND((((texters * 1) / 30)  + (total_texts * .0075)), 2) AS cost,
+        ROUND((((texters * 1) / 30)  + ((total_texts) * .0075)), 2) AS cost,
         (SELECT array_to_json(array_agg(row_to_json(t))) FROM (
           SELECT campaign_id,
             question,
@@ -53,9 +53,13 @@ import { groupBy } from 'lodash'
         INNER JOIN (
           SELECT campaign_id,
             COUNT(DISTINCT user_id) AS texters,
-            SUM(CASE WHEN is_from_contact = 'f' THEN 1 ELSE 0 END) AS texts_sent,
-            SUM(CASE WHEN is_from_contact = 't' THEN 1 ELSE 0 END) AS replies,
-            COUNT(*) AS total_texts,
+            COUNT(DISTINCT (
+              CASE WHEN m.is_from_contact = 'f' THEN m.id END
+            )) AS texts_sent,
+            COUNT(DISTINCT (
+              CASE WHEN m.is_from_contact = 't' THEN m.id END
+            )) AS replies,
+            COUNT(DISTINCT m.id) AS total_texts,
             COUNT(DISTINCT o.id) AS opt_outs
           FROM assignment AS a
           INNER JOIN message AS m ON m.assignment_id = a.id
@@ -81,7 +85,7 @@ import { groupBy } from 'lodash'
           if (responses && responses.length) {
             const questionGroup = groupBy(responses, 'question')
             responseHTML = Object.keys(questionGroup).map((question) => (`
-              <div style="overflow-x:auto;width:100%">
+              <div style="width:100%;">
                 <div><b>Question:</b> ${question}</div>
                 <table style="font-size:11px">
                   <tr>
@@ -102,11 +106,11 @@ import { groupBy } from 'lodash'
           }
 
           return (`
-            <div style="border: 2px solid #888;margin-right:15px;padding: 10px;border-radius: 3px">
+            <div style="margin-right:15px;padding:10px;border:2px solid #888;border-radius:3px;min-width:420px;max-width:700px">
               <div><b>${campaign}</b></div>
               <div><em>${description}</em></div>
               <br>
-              <table style="width:600px">
+              <table style="width:100%;">
                 <tr>
                   <th>Texters</th>
                   <th>Texts Sent</th>
