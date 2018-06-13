@@ -211,7 +211,7 @@ export class AssignmentTexterContact extends React.Component {
       snackbarError,
       snackbarActionTitle,
       snackbarOnTouchTap,
-      optOutMessageText: "While we do not have any control over the public voter registration list provided by local election officials, we will not text you again from Working Families.",
+      optOutMessageText: "I am opting you out of text messages from DC Choice now. Have a good day!",
       responsePopoverOpen: false,
       messageText: this.getStartingMessageText(),
       optOutDialogOpen: false,
