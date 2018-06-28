@@ -65,7 +65,7 @@ class AdminDashboard extends React.Component {
       path: 'optouts',
       role: 'ADMIN'
     }, {
-      name: 'Message Review',
+      name: 'Incoming Messages',
       path: 'incoming',
       role: 'SUPERVOLUNTEER'
     }, {

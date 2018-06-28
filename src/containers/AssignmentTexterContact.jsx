@@ -119,10 +119,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   lgMobileToolBar: {
-    '@media(max-width: 449px) and (min-width: 320px)': {
+    '@media(max-width: 449px) and (min-width: 410px)': {
       bottom: '0 !important',
-      marginLeft: '0px !important',
-      display: 'block !important'
+      marginLeft: '0px !important'
     }
   }
 })
@@ -442,11 +441,7 @@ export class AssignmentTexterContact extends React.Component {
     }
     this.setState({ disabled: true })
     try {
-
-      if(optOutMessageText.length){
-        await this.props.mutations.sendMessage(message, contact.id)
-      }
-
+      await this.props.mutations.sendMessage(message, contact.id)
       const optOut = {
         cell: contact.cell,
         assignmentId: assignment.id
@@ -522,7 +517,7 @@ export class AssignmentTexterContact extends React.Component {
   }
 
   optOutSchema = yup.object({
-    optOutMessageText: yup.string()
+    optOutMessageText: yup.string().required()
   })
 
   skipContact = () => {
@@ -769,7 +764,7 @@ export class AssignmentTexterContact extends React.Component {
                 type='submit'
                 style={inlineStyles.dialogButton}
                 component={GSSubmitButton}
-                label={this.state.optOutMessageText.length ? 'Send' : 'Opt Out without Text'}
+                label='Send'
               />
             </div>
           </GSForm>

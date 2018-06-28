@@ -7,7 +7,6 @@ export const schema = `
     messageStatus: String
     isOptedOut: Boolean
     validTimezone: Boolean
-    includePastDue: Boolean
   }
 
   type Timezone {
