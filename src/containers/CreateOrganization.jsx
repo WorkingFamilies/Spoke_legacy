@@ -70,7 +70,6 @@ class CreateOrganization extends React.Component {
               }}
             >
               <Form.Field
-                id ='organization'
                 name='name'
                 label='Your organization'
                 hintText='Bartlet Campaign'

@@ -14,5 +14,3 @@ test.sqlite
 *#
 coverage/
 .idea/
-*sqlite
-*.vscode
