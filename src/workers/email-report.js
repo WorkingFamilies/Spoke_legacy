@@ -8,9 +8,7 @@ import { groupBy } from 'lodash'
   try {
     const yesterday = moment().subtract(1, 'day').format('dddd, MMM Do')
     const allowedRoles = [
-      'OWNER',
-      'ADMIN',
-      'SUPERVOLUNTEER'
+      'OWNER'
     ]
 
     const users = await r.knex('user_organization')
