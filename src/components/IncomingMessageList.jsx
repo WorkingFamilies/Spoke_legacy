@@ -66,45 +66,25 @@ export class IncomingMessageList extends Component {
         style: {
           textOverflow: 'ellipsis',
           overflow: 'hidden',
-          whiteSpace: 'pre-line'
+          whiteSpace: 'nowrap'
         }
       },
       {
         key: 'texter',
-        label: 'Texter',
-        style: {
-          textOverflow: 'ellipsis',
-          overflow: 'scroll',
-          whiteSpace: 'pre-line'
-        }
+        label: 'Texter'
       },
       {
         key: 'to',
-        label: 'To',
-        style: {
-          textOverflow: 'ellipsis',
-          overflow: 'scroll',
-          whiteSpace: 'pre-line'
-        }
+        label: 'To'
       },
       {
         key: 'status',
         label: 'Conversation Status',
-        style: {
-          textOverflow: 'ellipsis',
-          overflow: 'scroll',
-          whiteSpace: 'pre-line'
-        },
         render: (columnKey, row) => MESSAGE_STATUSES[row.status].name
       },
       {
         key: 'latestMessage',
         label: 'Latest Message',
-        style: {
-          textOverflow: 'ellipsis',
-          overflow: 'scroll',
-          whiteSpace: 'pre-line'
-        },
         render: (columnKey, row) => {
           let lastMessage = null
           let lastMessageEl = <p>No Messages</p>
@@ -125,11 +105,6 @@ export class IncomingMessageList extends Component {
       {
         key: 'viewConversation',
         label: 'View Conversation',
-        style: {
-          textOverflow: 'ellipsis',
-          overflow: 'scroll',
-          whiteSpace: 'pre-line'
-        },
         render: (columnKey, row) => {
           if (row.messages && row.messages.length > 0) {
             return (
