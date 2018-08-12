@@ -125,7 +125,7 @@ class CampaignList extends React.Component {
       />
     ) : (
       <List>
-        {campaigns.campaigns.map((campaign) => this.renderRow(campaign))}
+        {campaigns.map((campaign) => this.renderRow(campaign))}
       </List>
     )
   }
@@ -171,11 +171,7 @@ const mapQueriesToProps = ({ ownProps }) => ({
       organization(id: $organizationId) {
         id
         campaigns(campaignsFilter: $campaignsFilter) {
-          ... on CampaignsList{
-            campaigns{
-              ${campaignInfoFragment}
-            }
-          }
+          ${campaignInfoFragment}
         }
       }
     }`,

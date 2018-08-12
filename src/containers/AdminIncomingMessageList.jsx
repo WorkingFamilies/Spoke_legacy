@@ -1,19 +1,14 @@
 import React, { Component } from 'react'
-import _ from 'lodash'
-
-import IncomingMessageActions from '../components/IncomingMessageActions'
-import IncomingMessageFilter from '../components/IncomingMessageFilter'
-import IncomingMessageList from '../components/IncomingMessageList'
-import LoadingIndicator from '../components/LoadingIndicator'
-import PaginatedCampaignsRetriever from './PaginatedCampaignsRetriever'
-import gql from 'graphql-tag'
 import loadData from './hoc/load-data'
 import { withRouter } from 'react-router'
+import gql from 'graphql-tag'
+import IncomingMessageFilter from '../components/IncomingMessageFilter'
+import IncomingMessageActions from '../components/IncomingMessageActions'
+import IncomingMessageList from '../components/IncomingMessageList'
+import LoadingIndicator from '../components/LoadingIndicator'
 import wrapMutations from './hoc/wrap-mutations'
-import PaginatedUsersRetriever from './PaginatedUsersRetriever'
 
 export class AdminIncomingMessageList extends Component {
-
   constructor(props) {
     super(props)
 
@@ -22,66 +17,46 @@ export class AdminIncomingMessageList extends Component {
       pageSize: 10,
       contactsFilter: {},
       campaignsFilter: {},
-      campaignsFilterForTexterFiltering: { isArchived: false },
       assignmentsFilter: {},
       needsRender: false,
-      utc: Date.now().toString(),
-      campaigns: [],
-      texters: []
+      utc: Date.now().toString()
     }
 
-    this.handleCampaignChanged = this.handleCampaignChanged.bind(this)
+    this.handleCampaignChange = this.handleCampaignChange.bind(this)
     this.handleMessageFilterChange = this.handleMessageFilterChange.bind(this)
     this.handleReassignRequested = this.handleReassignRequested.bind(this)
     this.handlePageChange = this.handlePageChange.bind(this)
     this.handlePageSizeChange = this.handlePageSizeChange.bind(this)
     this.handleRowSelection = this.handleRowSelection.bind(this)
-    this.handleCampaignsReceived = this.handleCampaignsReceived.bind(this)
-    this.handleUsersReceived = this.handleUsersReceived.bind(this)
-    this.handleTexterChanged = this.handleTexterChanged.bind(this)
   }
 
   shouldComponentUpdate(_, nextState) {
     if (
       !nextState.needsRender &&
-      _.isEqual(this.state.contactsFilter, nextState.contactsFilter) &&
-      _.isEqual(this.state.campaignsFilter, nextState.campaignsFilter) &&
-      _.isEqual(this.state.assignmentsFilter, nextState.assignmentsFilter) 
+      nextState.contactsFilter === this.state.contactsFilter &&
+      nextState.campaignsFilter === this.state.campaignsFilter
     ) {
       return false
     }
     return true
   }
 
-  async handleCampaignChanged(campaignId) {
+  async handleCampaignChange(campaignId) {
     let campaignsFilter = {}
-    let campaignsFilterForTexterFiltering = {isArchived:false}
     switch (campaignId) {
       case -1:
         break
       case -2:
-        campaignsFilterForTexterFiltering = campaignsFilter = { isArchived: false }
+        campaignsFilter = { isArchived: false }
         break
       case -3:
-        campaignsFilterForTexterFiltering = campaignsFilter = { isArchived: true }
+        campaignsFilter = { isArchived: true }
         break
       default:
-        campaignsFilterForTexterFiltering = campaignsFilter = { campaignId }
+        campaignsFilter = { campaignId }
     }
     await this.setState({
-      campaignsFilterForTexterFiltering,
       campaignsFilter,
-      needsRender: true
-    })
-  }
-
-  async handleTexterChanged(texterId) {
-    const assignmentsFilter = {}
-    if (texterId >= 0) {
-      assignmentsFilter.texterId = texterId
-    }
-    await this.setState({
-      assignmentsFilter,
       needsRender: true
     })
   }
@@ -132,14 +107,6 @@ export class AdminIncomingMessageList extends Component {
     }
   }
 
-  async handleCampaignsReceived(campaigns) {
-    this.setState({ campaigns, needsRender: true })
-  }
-
-  async handleUsersReceived(texters){
-    this.setState({texters, needsRender: true})
-  }
-
   render() {
     const cursor = {
       offset: this.state.page * this.state.pageSize,
@@ -148,36 +115,21 @@ export class AdminIncomingMessageList extends Component {
     return (
       <div>
         <h3> Message Review </h3>
-        {(this.props.organization && this.props.organization.loading) ? (
-          <LoadingIndicator/>
+        {this.props.organization.loading ? (
+          <LoadingIndicator />
         ) : (
           <div>
-            <PaginatedUsersRetriever
-              organizationId={this.props.params.organizationId}
-              onUsersReceived={this.handleUsersReceived}
-              pageSize={1000}
-              campaignsFilter={this.state.campaignsFilterForTexterFiltering}
-            />
-            <PaginatedCampaignsRetriever
-              organizationId={this.props.params.organizationId}
-              campaignsFilter={{ isArchived: false }}
-              onCampaignsReceived={this.handleCampaignsReceived}
-              pageSize={1000}
-            />
             <IncomingMessageFilter
-              campaigns={this.state.campaigns}
-              texters={this.state.texters}
-              onCampaignChanged={this.handleCampaignChanged}
-              onTexterChanged={this.handleTexterChanged}
+              campaigns={this.props.organization.organization.campaigns}
+              onCampaignChanged={this.handleCampaignChange}
               onMessageFilterChanged={this.handleMessageFilterChange}
-              assignmentsFilter={this.state.assignmentsFilter}
             />
-            <br/>
+            <br />
             <IncomingMessageActions
               people={this.props.organization.organization.people}
               onReassignRequested={this.handleReassignRequested}
             />
-            <br/>
+            <br />
             <IncomingMessageList
               organizationId={this.props.params.organizationId}
               cursor={cursor}
@@ -202,10 +154,14 @@ const mapQueriesToProps = ({ ownProps }) => ({
       query Q($organizationId: String!) {
         organization(id: $organizationId) {
           id
-          people{
+          people {
             id
             displayName
             roles(organizationId: $organizationId)
+          }
+          campaigns {
+            id
+            title
           }
         }
       }
