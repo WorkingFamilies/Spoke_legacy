@@ -1,61 +1,80 @@
-import camelCaseKeys from 'camelcase-keys'
-import GraphQLDate from 'graphql-date'
-import GraphQLJSON from 'graphql-type-json'
-import { GraphQLError } from 'graphql/error'
-import isUrl from 'is-url'
-
-import { gzip, log, makeTree } from '../../lib'
 import { applyScript } from '../../lib/scripts'
-import {
-  assignTexters,
-  exportCampaign,
-  loadContactsFromDataWarehouse,
-  uploadContacts
-} from '../../workers/jobs'
+import camelCaseKeys from 'camelcase-keys'
+import isUrl from 'is-url'
+import { buildCampaignQuery } from './campaign'
+
 import {
   Assignment,
   Campaign,
   CannedResponse,
-  datawarehouse,
+  InteractionStep,
   Invite,
-  JobRequest,
   Message,
   OptOut,
   Organization,
   QuestionResponse,
-  r,
+  UserOrganization,
+  JobRequest,
   User,
-  UserOrganization
+  r,
+  datawarehouse
 } from '../models'
-import { Notifications, sendUserNotification } from '../notifications'
-import { resolvers as assignmentResolvers } from './assignment'
-import { getCampaigns, resolvers as campaignResolvers } from './campaign'
-import { resolvers as campaignContactResolvers } from './campaign-contact'
-import { resolvers as cannedResponseResolvers } from './canned-response'
+import { schema as userSchema, resolvers as userResolvers, buildUserOrganizationQuery } from './user'
 import {
+  schema as conversationSchema,
   getConversations,
   resolvers as conversationsResolver
 } from './conversations'
+import { schema as organizationSchema, resolvers as organizationResolvers } from './organization'
+import { schema as campaignSchema, resolvers as campaignResolvers } from './campaign'
 import {
-  accessRequired,
-  assignmentRequired,
+  schema as assignmentSchema,
+  resolvers as assignmentResolvers
+} from './assignment'
+import {
+  schema as interactionStepSchema,
+  resolvers as interactionStepResolvers
+} from './interaction-step'
+import { schema as questionSchema, resolvers as questionResolvers } from './question'
+import {
+  schema as questionResponseSchema,
+  resolvers as questionResponseResolvers
+} from './question-response'
+import { GraphQLPhone } from './phone'
+import { schema as optOutSchema, resolvers as optOutResolvers } from './opt-out'
+import { schema as messageSchema, resolvers as messageResolvers } from './message'
+import {
+  schema as campaignContactSchema,
+  resolvers as campaignContactResolvers
+} from './campaign-contact'
+import {
+  schema as cannedResponseSchema,
+  resolvers as cannedResponseResolvers
+} from './canned-response'
+import { schema as inviteSchema, resolvers as inviteResolvers } from './invite'
+import {
   authRequired,
+  accessRequired,
+  hasRole,
+  assignmentRequired,
   superAdminRequired
 } from './errors'
-import { resolvers as interactionStepResolvers } from './interaction-step'
-import { resolvers as inviteResolvers } from './invite'
-import { saveNewIncomingMessage } from './lib/message-sending'
 import serviceMap from './lib/services'
-import { resolvers as messageResolvers } from './message'
-import { resolvers as optOutResolvers } from './opt-out'
-import { resolvers as organizationResolvers } from './organization'
-import { GraphQLPhone } from './phone'
-import { resolvers as questionResolvers } from './question'
-import { resolvers as questionResponseResolvers } from './question-response'
-import { getUsers, resolvers as userResolvers } from './user'
-
+import { saveNewIncomingMessage } from './lib/message-sending'
+import { gzip, log, makeTree } from '../../lib'
 // import { isBetweenTextingHours } from '../../lib/timezones'
+import { Notifications, sendUserNotification } from '../notifications'
+import {
+  uploadContacts,
+  loadContactsFromDataWarehouse,
+  assignTexters,
+  exportCampaign
+} from '../../workers/jobs'
 const uuidv4 = require('uuid').v4
+import GraphQLDate from 'graphql-date'
+import GraphQLJSON from 'graphql-type-json'
+import { GraphQLError } from 'graphql/error'
+
 const JOBS_SAME_PROCESS = !!(process.env.JOBS_SAME_PROCESS || global.JOBS_SAME_PROCESS)
 const JOBS_SYNC = !!(process.env.JOBS_SYNC || global.JOBS_SYNC)
 
@@ -559,7 +578,7 @@ const rootMutations = {
       let createCannedResponses = r
         .knex('canned_response')
         .where({ campaign_id: oldCampaignId })
-        .then(function(res) {
+        .then(function (res) {
           res.forEach((response, index) => {
             const copiedCannedResponse = new CannedResponse({
               campaign_id: newCampaignId,
@@ -833,7 +852,7 @@ const rootMutations = {
 
       return []
     },
-    sendMessage: async (_, { message, campaignContactId }, { loaders }) => {
+    sendMessage: async (_, { message, campaignContactId }, { user, loaders }) => {
       const contact = await loaders.campaignContact.load(campaignContactId)
       const campaign = await loaders.campaign.load(contact.campaign_id)
       if (contact.assignment_id !== parseInt(message.assignmentId) || campaign.is_archived) {
@@ -893,6 +912,7 @@ const rootMutations = {
       const messageInstance = new Message({
         text: replaceCurlyApostrophes(text),
         contact_number: contactNumber,
+        user_id: user.id,
         user_number: '',
         assignment_id: message.assignmentId,
         send_status: JOBS_SAME_PROCESS ? 'SENDING' : 'QUEUED',
@@ -1177,14 +1197,6 @@ const rootResolvers = {
         contactsFilter,
         utc
       )
-    },
-    campaigns: async (_, {organizationId, cursor, campaignsFilter}, {user}) => {
-      await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
-      return getCampaigns(organizationId, cursor, campaignsFilter)
-    },
-    people: async (_, {organizationId, cursor, campaignsFilter, role}, {user}) => {
-      await accessRequired(user, organizationId, 'SUPERVOLUNTEER')
-      return getUsers(organizationId, cursor, campaignsFilter, role)
     }
   }
 }
