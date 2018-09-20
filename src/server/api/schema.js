@@ -28,8 +28,7 @@ import {
   QuestionResponse,
   r,
   User,
-  UserOrganization
-  datawarehouse,
+  UserOrganization,
   cacheableData
 } from '../models'
 import { Notifications, sendUserNotification } from '../notifications'
