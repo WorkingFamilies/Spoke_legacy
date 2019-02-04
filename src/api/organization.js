@@ -4,9 +4,10 @@ export const schema = `
     uuid: String
     name: String
     campaigns(cursor:OffsetLimitCursor, campaignsFilter: CampaignsFilter): CampaignsReturn
-    people(role: String): [User]
+    people(role: String, campaignId: String): [User]
     optOuts: [OptOut]
     threeClickEnabled: Boolean
+    optOutMessage: String
     textingHoursEnforced: Boolean
     textingHoursStart: Int
     textingHoursEnd: Int
