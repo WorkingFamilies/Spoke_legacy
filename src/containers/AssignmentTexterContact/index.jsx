@@ -548,7 +548,7 @@ export class AssignmentTexterContact extends React.Component {
     }
 
     if (campaign.overrideOrganizationTextingHours) {
-      config.campaignTextingHours = { 
+      config.campaignTextingHours = {
         textingHoursStart: campaign.textingHoursStart,
         textingHoursEnd: campaign.textingHoursEnd,
         textingHoursEnforced: campaign.textingHoursEnforced,
