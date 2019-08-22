@@ -176,6 +176,7 @@ const rootSchema = gql`
     campaign(id: String!): Campaign
     inviteByHash(hash: String!): [Invite]
     assignment(id: String!): Assignment
+    contact(id: String!): CampaignContact
     organizations: [Organization]
     availableActions(organizationId: String!): [Action]
     conversations(
