@@ -4,6 +4,8 @@ export const resolvers = {
   Question: {
     text: async interactionStep => interactionStep.question,
     answerOptions: async interactionStep =>
+      // this should usually be pre-built from campaign's interactionSteps call
+      interactionStep.answerOptions ||
       r
         .table("interaction_step")
         .filter({ parent_interaction_id: interactionStep.id })
@@ -21,6 +23,7 @@ export const resolvers = {
     value: answer => answer.value,
     interactionStepId: answer => answer.interaction_step_id,
     nextInteractionStep: async answer =>
+      answer.nextInteractionStep ||
       r.table("interaction_step").get(answer.interaction_step_id),
     responders: async answer =>
       r

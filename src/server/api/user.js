@@ -264,6 +264,6 @@ export const resolvers = {
           organization_id: organizationId,
           is_archived: false
         })("left"),
-    cacheable: () => Boolean(r.redis)
+    cacheable: () => false // FUTURE: Boolean(r.redis) when full assignment data is cached
   }
 };

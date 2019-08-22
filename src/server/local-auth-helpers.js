@@ -130,8 +130,8 @@ const reset = ({ password, existingUser, reqBody, uuidMatch }) => {
 export const change = ({ user, password, newPassword, passwordConfirm }) => {
   const pwFieldSplit = user.auth0_id.split("|");
   const hashedPassword = {
-    salt: pwFieldSplit[0],
-    hash: pwFieldSplit[1]
+    salt: pwFieldSplit[1],
+    hash: pwFieldSplit[2]
   };
 
   // Verify password and password confirm fields match

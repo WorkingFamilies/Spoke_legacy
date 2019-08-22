@@ -10,7 +10,6 @@ import CampaignContact from "./campaign-contact";
 import InteractionStep from "./interaction-step";
 import QuestionResponse from "./question-response";
 import OptOut from "./opt-out";
-import Migrations from "./migrations";
 import JobRequest from "./job-request";
 import Invite from "./invite";
 import CannedResponse from "./canned-response";
@@ -24,7 +23,7 @@ import Tag from "./tag";
 import thinky from "./thinky";
 import datawarehouse from "./datawarehouse";
 
-import { cacheableData } from "./cacheable_queries";
+import cacheableData from "./cacheable_queries";
 
 function createLoader(model, opts) {
   const idKey = (opts && opts.idKey) || "id";
@@ -54,7 +53,6 @@ const tableList = [
   "job_request",
   "log",
   "message",
-  "migrations",
   "opt_out", // good candidate
   "pending_message_part",
   "question_response",
@@ -69,21 +67,25 @@ function createTablesIfNecessary() {
   return thinky.k.schema.hasTable("organization").then(tableExists => {
     if (!tableExists) {
       console.log("CREATING DATABASE SCHEMA");
-      createTables();
-      return true;
+      return thinky.r.k.migrate.latest();
     }
   });
 }
 
 function createTables() {
-  return thinky.createTables(tableList);
+  return thinky.r.knex.migrate.latest();
 }
 
 function dropTables() {
-  return thinky.dropTables(tableList);
+  // thinky.r.knex.destroy() DOES NOT WORK
+  return thinky.dropTables(tableList).then(function() {
+    return thinky.dropTables(["knex_migrations", "knex_migrations_lock"]);
+  });
 }
 
-const createLoaders = () => ({
+const loaders = {
+  // Note: loaders with cacheObj should also run loaders.XX.clear(id)
+  //  on clear on the cache as well.
   assignment: createLoader(Assignment),
   campaign: createLoader(Campaign, { cacheObj: cacheableData.campaign }),
   invite: createLoader(Invite),
@@ -98,18 +100,20 @@ const createLoaders = () => ({
   cannedResponse: createLoader(CannedResponse),
   jobRequest: createLoader(JobRequest),
   message: createLoader(Message),
-  migrations: createLoader(Migrations),
   optOut: createLoader(OptOut),
   pendingMessagePart: createLoader(PendingMessagePart),
   tag: createLoader(Tag),
   questionResponse: createLoader(QuestionResponse),
   userCell: createLoader(UserCell),
   userOrganization: createLoader(UserOrganization)
-});
+};
+
+const createLoaders = () => loaders;
 
 const r = thinky.r;
 
 export {
+  loaders,
   createLoaders,
   r,
   cacheableData,
@@ -117,7 +121,6 @@ export {
   createTablesIfNecessary,
   dropTables,
   datawarehouse,
-  Migrations,
   Assignment,
   Campaign,
   CampaignContact,

@@ -13,7 +13,6 @@ import {
   clearOldJobs,
   importScript
 } from "./jobs";
-import { runMigrations } from "../migrations";
 import { setupUserNotificationObservers } from "../server/notifications";
 
 export { seedZipCodes } from "../server/seeds/seed-zip-codes";
@@ -182,7 +181,7 @@ export async function handleIncomingMessages() {
 }
 
 export async function runDatabaseMigrations(event, dispatcher, eventCallback) {
-  await runMigrations(event.migrationStart);
+  await r.knex.migrate.latest();
   if (eventCallback) {
     eventCallback(null, "completed migrations");
   }

@@ -71,8 +71,11 @@ const ContactToolbar = function ContactToolbar(props) {
       <Toolbar
         style={inlineStyles.toolbar}
       >
-        <ToolbarGroup>
-          <ToolbarTitle text={campaignContact.firstName} />
+        <ToolbarGroup >
+          <ToolbarTitle
+            text={campaignContact.firstName}
+            title={`id:${campaignContact.id} m:${campaignContact.messages.length} s:${campaignContact.messageStatus}`}
+          />
           <ToolbarTitle
             style={inlineStyles.cellToolbarTitle}
           />

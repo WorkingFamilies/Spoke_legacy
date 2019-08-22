@@ -8,9 +8,9 @@ import { r } from "../../models";
 // * needs to get by campaignId-userId pairs
 
 const cacheKey = (campaignId, userId) =>
-  `${process.env.CACHE_PREFIX | ""}canned-${campaignId}-${userId | ""}`;
+  `${process.env.CACHE_PREFIX || ""}canned-${campaignId}-${userId || ""}`;
 
-export const cannedResponseCache = {
+const cannedResponseCache = {
   clearQuery: async ({ campaignId, userId }) => {
     if (r.redis) {
       await r.redis.delAsync(cacheKey(campaignId, userId));
@@ -38,9 +38,11 @@ export const cannedResponseCache = {
       await r.redis
         .multi()
         .set(cacheKey(campaignId, userId), JSON.stringify(cacheData))
-        .expire(cacheKey(campaignId, userId), 86400)
+        .expire(cacheKey(campaignId, userId), 43200) // 12 hours
         .execAsync();
     }
     return dbResult;
   }
 };
+
+export default cannedResponseCache;

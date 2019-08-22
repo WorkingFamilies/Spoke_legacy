@@ -38,6 +38,68 @@ const contactDataFragment = `
         }
 `
 
+export const dataQuery = gql`query getContacts($assignmentId: String!, $contactsFilter: ContactsFilter!) {
+      assignment(id: $assignmentId) {
+        id
+        userCannedResponses {
+          id
+          title
+          text
+          isUserCreated
+        }
+        campaignCannedResponses {
+          id
+          title
+          text
+          isUserCreated
+        }
+        texter {
+          id
+          firstName
+          lastName
+          displayName
+        }
+        campaign {
+          id
+          title
+          isArchived
+          useDynamicAssignment
+          overrideOrganizationTextingHours
+          timezone
+          textingHoursStart
+          textingHoursEnd
+          textingHoursEnforced
+          organization {
+            id
+            textingHoursEnforced
+            textingHoursStart
+            textingHoursEnd
+            threeClickEnabled
+            optOutMessage
+          }
+          customFields
+          interactionSteps {
+            id
+            script
+            question {
+              text
+              answerOptions {
+                value
+                nextInteractionStep {
+                  id
+                  script
+                }
+              }
+            }
+          }
+        }
+        contacts(contactsFilter: $contactsFilter) {
+          id
+        }
+        allContactsCount: contactsCount
+      }
+    }`
+
 export class TexterTodo extends React.Component {
   constructor() {
     super()
@@ -134,67 +196,7 @@ TexterTodo.propTypes = {
 
 const mapQueriesToProps = ({ ownProps }) => ({
   data: {
-    query: gql`query getContacts($assignmentId: String!, $contactsFilter: ContactsFilter!) {
-      assignment(id: $assignmentId) {
-        id
-        userCannedResponses {
-          id
-          title
-          text
-          isUserCreated
-        }
-        campaignCannedResponses {
-          id
-          title
-          text
-          isUserCreated
-        }
-        texter {
-          id
-          firstName
-          lastName
-          displayName
-        }
-        campaign {
-          id
-          title
-          isArchived
-          useDynamicAssignment
-          overrideOrganizationTextingHours
-          timezone
-          textingHoursStart
-          textingHoursEnd
-          textingHoursEnforced
-          organization {
-            id
-            textingHoursEnforced
-            textingHoursStart
-            textingHoursEnd
-            threeClickEnabled
-            optOutMessage
-          }
-          customFields
-          interactionSteps {
-            id
-            script
-            question {
-              text
-              answerOptions {
-                value
-                nextInteractionStep {
-                  id
-                  script
-                }
-              }
-            }
-          }
-        }
-        contacts(contactsFilter: $contactsFilter) {
-          id
-        }
-        allContactsCount: contactsCount
-      }
-    }`,
+    query: dataQuery,
     variables: {
       contactsFilter: {
         contactId: ownProps.params.contactId,
