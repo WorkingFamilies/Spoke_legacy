@@ -838,8 +838,14 @@ const rootMutations = {
             const campaign = await loaders.campaign.load(contact.campaign_id);
 
             const baseUrl = process.env.BASE_URL;
-            const organizationId = campaign.organization_id;
-            const assignmentId = contact.assignment_id;
+            const {
+              organization_id: organizationId,
+              id: campaign_id,
+              title: campaign_title
+            } = campaign;
+            const {
+              assignment_id: assignmentId
+            } = contact;
             const conversationLink = `${baseUrl}/app/${organizationId}/todos/${assignmentId}/review/${campaignContactId}`;
 
             const { first_name: firstName, last_name: lastName, email } = user;
@@ -847,6 +853,10 @@ const rootMutations = {
               texter: {
                 name: `${firstName} ${lastName}`,
                 email
+              },
+              campaign: {
+                id: campaign_id,
+                title: campaign_title
               },
               conversation: conversationLink,
               tags
